@@ -1,0 +1,63 @@
+<sited>
+    <meta>
+        <title>漫画柜</title>
+        <version>0.0.1</version>
+        <author>青菜白玉汤</author>
+        <url>https://m.manhuagui.com</url>
+    </meta>
+    <main>
+        <book>
+            <route>/comic/:mangaId</route>
+            <handler>
+                <![CDATA[
+const mangaInfo = {name: document.querySelector('.main-bar h1')?.textContent,
+cover: document.querySelector('.thumb img')?.src,url: location.href};
+const liList = await $waitForSelector("#chapterList li");
+const chapters = [];
+liList.forEach((li) => {
+const a = li.querySelector("a");
+const b = li.querySelector('b');
+chapters.push({title: b.textContent, url: a.href})});
+mangaInfo.chapters = chapters;
+$sendData(mangaInfo);]]>
+            </handler>
+        </book>
+        <detail>
+            <route>/comic/:mangaId/:chapterId.html</route>
+            <script>
+            <![CDATA[
+const mangaPage = document.querySelector(".manga-page").textContent || "";
+const count = Number(mangaPage.match(/(\d+)P/)?.[1] || 0);
+const result = [];
+const cookie = document.cookie;
+const executors = Array.from({ length: count }, (_, i) => async () => {
+    const [el] = await $waitForSelector("#manga > img");
+    const imgUrl = el?.src;
+    if (imgUrl) {
+        result[i] = {
+            url: imgUrl,
+            referer: "https://m.manhuagui.com/",
+            cookie: cookie,
+            userAgent: navigator.userAgent,
+        };
+    }
+    if (i < count - 1) {
+        await $locator("#next").click();
+        await sleep(400);
+    }
+})
+const run = async () => {
+    const executor = executors.shift();
+    if (executor) {
+        await executor();
+        return run();
+    }
+};
+run().finally(() => {
+    $sendData(result);
+})
+]]>
+            </script>
+        </detail>
+    </main>
+</sited>
