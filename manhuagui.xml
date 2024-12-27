@@ -1,5 +1,6 @@
 <sited>
     <meta>
+        <id>12345667</id>
         <title>漫画柜</title>
         <version>0.0.1</version>
         <author>青菜白玉汤</author>
@@ -8,7 +9,8 @@
     <main>
         <book>
             <route>/comic/:mangaId</route>
-            <handler>
+            <use-proxy>true</use-proxy>
+            <script>
                 <![CDATA[
 const mangaInfo = {name: document.querySelector('.main-bar h1')?.textContent,
 cover: document.querySelector('.thumb img')?.src,url: location.href};
@@ -20,10 +22,11 @@ const b = li.querySelector('b');
 chapters.push({title: b.textContent, url: a.href})});
 mangaInfo.chapters = chapters;
 $sendData(mangaInfo);]]>
-            </handler>
+            </script>
         </book>
         <detail>
             <route>/comic/:mangaId/:chapterId.html</route>
+            <use-proxy>true</use-proxy>
             <script>
             <![CDATA[
 const mangaPage = document.querySelector(".manga-page").textContent || "";
